@@ -1,9 +1,9 @@
 // Network and P2P connection handling
 import * as State from './state.js';
 import { showMessage, addChatMessage, clearChat } from './utils.js';
-import { 
-    updatePlayersDisplay, 
-    updateOtherPlayersBoards, 
+import {
+    updatePlayersDisplay,
+    updateOtherPlayersBoards,
     updateReadyDisplay,
     showLobby,
     startGame,
@@ -16,7 +16,7 @@ import {
 
 export function broadcastToAll(data) {
     if (!State.connections || State.connections.length === 0) return;
-    
+
     State.connections.forEach(conn => {
         if (conn && conn.open) {
             try {
@@ -31,7 +31,7 @@ export function broadcastToAll(data) {
 export function broadcastBoardUpdate() {
     const boardData = State.guesses.map(g => g.result);
     State.players[State.peer.id].board = boardData;
-    
+
     broadcastToAll({
         type: 'boardUpdate',
         playerId: State.peer.id,
@@ -41,7 +41,7 @@ export function broadcastBoardUpdate() {
 
 export function handleConnection(conn) {
     State.setConnections([...State.connections, conn]);
-    
+
     // Store the peer ID for this connection
     conn.metadata = conn.metadata || {};
 
@@ -56,20 +56,20 @@ export function handleConnection(conn) {
     conn.on('close', () => {
         State.setConnections(State.connections.filter(c => c !== conn));
         const playerId = conn.metadata.playerId;
-        
+
         if (playerId && State.players[playerId]) {
             // Mark as disconnected instead of deleting
             State.players[playerId].disconnected = true;
             State.readyPlayers.delete(playerId);
-            
+
             // Notify other players
             if (State.isHost) {
                 broadcastToAll({ type: 'playerLeft', playerId: playerId });
             }
-            
+
             updatePlayersDisplay();
             updateOtherPlayersBoards();
-            
+
             // Check if room should close (only if game started and only 1 connected player remains)
             if (State.hasGameStarted) {
                 const connectedPlayers = Object.values(State.players).filter(p => !p.disconnected).length;
@@ -89,22 +89,22 @@ export function handleMessage(data, conn) {
                 const existingPlayer = Object.values(State.players).find(
                     p => p.username.toLowerCase() === data.username.toLowerCase() && !p.disconnected
                 );
-                
+
                 if (existingPlayer) {
                     // Reject join due to duplicate name
-                    conn.send({ 
-                        type: 'joinRejected', 
-                        reason: 'A player with that name is already in the room.' 
+                    conn.send({
+                        type: 'joinRejected',
+                        reason: 'A player with that name is already in the room.'
                     });
                     return;
                 }
-                
+
                 // Check if player already exists
                 if (!State.players[data.playerId]) {
-                    State.players[data.playerId] = { 
-                        username: data.username, 
-                        ready: false, 
-                        score: 0, 
+                    State.players[data.playerId] = {
+                        username: data.username,
+                        ready: false,
+                        score: 0,
                         board: [],
                         finished: false,
                         completionTime: null,
@@ -114,15 +114,15 @@ export function handleMessage(data, conn) {
                     };
                     State.totalScores[data.playerId] = 0;
                 }
-                
+
                 // Send current player list to new player
-                conn.send({ 
-                    type: 'playerList', 
+                conn.send({
+                    type: 'playerList',
                     players: State.players,
                     totalScores: State.totalScores,
-                    roomId: State.roomId 
+                    roomId: State.roomId
                 });
-                
+
                 // Broadcast to all players
                 broadcastToAll({ type: 'playerUpdate', players: State.players, totalScores: State.totalScores });
                 updatePlayersDisplay();
@@ -157,7 +157,7 @@ export function handleMessage(data, conn) {
             if (State.players[data.playerId]) {
                 State.players[data.playerId].board = data.board;
                 updateOtherPlayersBoards();
-                
+
                 // If host receives a board update, relay it to all other players
                 if (State.isHost && data.playerId !== State.peer.id) {
                     broadcastToAll({
@@ -195,7 +195,7 @@ export function handleMessage(data, conn) {
                 }
                 updateReadyDisplay();
                 broadcastToAll({ type: 'readyStatus', readyPlayers: Array.from(State.readyPlayers) });
-                
+
                 if (State.readyPlayers.size === Object.keys(State.players).length) {
                     import('./ui.js').then(({ startNextRound }) => startNextRound());
                 }
@@ -212,12 +212,12 @@ export function handleMessage(data, conn) {
             if (data.senderId !== State.peer.id) {
                 addChatMessage(data.username, data.message);
             }
-            
+
             // If host receives a chat from a player, relay it to all other players
             if (State.isHost && data.senderId !== State.peer.id) {
-                broadcastToAll({ 
-                    type: 'chat', 
-                    username: data.username, 
+                broadcastToAll({
+                    type: 'chat',
+                    username: data.username,
                     message: data.message,
                     senderId: data.senderId
                 });
@@ -237,7 +237,7 @@ export function handleMessage(data, conn) {
                 showResultsScreen();
             }
             break;
-            
+
         case 'roomClosed':
             // Tried to join a closed room
             alert('This room has been closed.');
@@ -246,7 +246,7 @@ export function handleMessage(data, conn) {
                 backToMenu();
             });
             break;
-            
+
         case 'joinRejected':
             // Join rejected (duplicate name, etc.)
             alert(data.reason || 'Unable to join room.');
@@ -259,20 +259,20 @@ export function handleMessage(data, conn) {
         case 'playerLeft':
             if (State.players[data.playerId]) {
                 const wasInGame = State.hasGameStarted;
-                
+
                 // Mark player as disconnected but keep in rankings
                 State.players[data.playerId].disconnected = true;
                 State.readyPlayers.delete(data.playerId);
-                
+
                 // Host relays the disconnection to all other players
                 if (State.isHost) {
                     broadcastToAll({ type: 'playerLeft', playerId: data.playerId });
                 }
-                
+
                 updatePlayersDisplay();
                 updateOtherPlayersBoards();
                 updateReadyDisplay();
-                
+
                 // Only close room if game has started and only 1 connected player remains
                 const connectedPlayers = Object.values(State.players).filter(p => !p.disconnected).length;
                 if (wasInGame && connectedPlayers <= 1) {
@@ -280,12 +280,12 @@ export function handleMessage(data, conn) {
                 }
             }
             break;
-            
+
         case 'ping':
             // Respond with pong to confirm we're active
             broadcastToAll({ type: 'pong', playerId: State.peer.id });
             break;
-            
+
         case 'pong':
             // Host receives pong responses and marks players as active
             if (State.isHost && data.playerId) {
@@ -299,13 +299,13 @@ export function handleMessage(data, conn) {
 export function sendChatMessage() {
     const input = document.getElementById('chatInput');
     if (!input) return;
-    
+
     const message = input.value.trim();
-    
+
     if (message) {
         // Add message to own chat first
         addChatMessage(State.myUsername, message);
-        
+
         // Then broadcast to others (host will relay if needed)
         broadcastToAll({
             type: 'chat',
@@ -313,7 +313,7 @@ export function sendChatMessage() {
             message: message,
             senderId: State.peer.id
         });
-        
+
         input.value = '';
     }
 }

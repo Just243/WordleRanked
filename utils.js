@@ -37,7 +37,7 @@ export function clearChat() {
 export function addChatMessage(username, message) {
     const container = document.getElementById('chatMessages');
     if (!container) return;
-    
+
     const div = document.createElement('div');
     div.className = 'chat-message';
     div.innerHTML = `<strong>${username}:</strong> ${message}`;

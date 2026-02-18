@@ -375,7 +375,7 @@ button:disabled {
     .other-players-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     }
-    
+
     .mini-tile {
         width: 15px;
         height: 15px;

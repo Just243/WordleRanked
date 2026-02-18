@@ -60,12 +60,12 @@ window.addEventListener('beforeunload', () => {
 // Main functions
 export function createMatch() {
     State.setMyUsername(document.getElementById('usernameInput').value.trim() || generateUsername());
-    
+
     // Save username to localStorage
     if (document.getElementById('usernameInput').value.trim()) {
         localStorage.setItem('wordleUsername', State.myUsername);
     }
-    
+
     State.setRoomId(generateRoomId());
     State.setIsHost(true);
 
@@ -77,15 +77,15 @@ function attemptCreatePeer(retryCount) {
         showMessage('mainMenuMessage', 'Failed to create match after multiple attempts', 'error');
         return;
     }
-    
+
     State.setPeer(new Peer(State.roomId));
-    
+
     State.peer.on('open', (id) => {
         console.log('Peer created with ID:', id);
-        State.players[State.peer.id] = { 
-            username: State.myUsername, 
-            ready: false, 
-            score: 0, 
+        State.players[State.peer.id] = {
+            username: State.myUsername,
+            ready: false,
+            score: 0,
             board: [],
             finished: false,
             completionTime: null,
@@ -119,22 +119,22 @@ export function joinMatch() {
         showMessage('mainMenuMessage', 'Already joining...', 'info');
         return;
     }
-    
+
     const targetRoomId = document.getElementById('joinRoomInput').value.toUpperCase();
-    
+
     if (State.joinedRoomId === targetRoomId && State.peer && State.peer.id) {
         showMessage('mainMenuMessage', 'Already in this room', 'info');
         return;
     }
-    
+
     State.setIsJoining(true);
     State.setMyUsername(document.getElementById('usernameInput').value.trim() || generateUsername());
-    
+
     // Save username to localStorage
     if (document.getElementById('usernameInput').value.trim()) {
         localStorage.setItem('wordleUsername', State.myUsername);
     }
-    
+
     State.setRoomId(targetRoomId);
     State.setIsHost(false);
 
@@ -144,7 +144,7 @@ export function joinMatch() {
     State.peer.on('open', () => {
         const conn = State.peer.connect(State.roomId);
         handleConnection(conn);
-        
+
         conn.on('open', () => {
             State.setJoinedRoomId(State.roomId);
             conn.send({ type: 'join', username: State.myUsername, playerId: State.peer.id });
@@ -166,7 +166,7 @@ export function joinMatch() {
         State.setJoinedRoomId(null);
         cleanup();
     });
-    
+
     // Timeout for connection
     setTimeout(() => {
         if (State.isJoining && document.getElementById('mainMenu').classList.contains('active')) {
@@ -180,34 +180,34 @@ export function joinMatch() {
 
 export function startMatch() {
     if (!State.isHost) return;
-    
+
     const startBtn = document.getElementById('startMatchBtn');
-    
+
     // Check if there are at least 2 connected players
     const connectedPlayers = Object.values(State.players).filter(p => !p.disconnected).length;
     if (connectedPlayers < 2) {
         alert('You need at least 2 players to start a match!');
         return;
     }
-    
+
     // Change button text to indicate starting
     startBtn.textContent = 'Starting...';
     startBtn.disabled = true;
-    
+
     // Send ping to all players to verify they're still connected
     State.activePingPlayers.clear();
     State.activePingPlayers.add(State.peer.id);
-    
+
     const expectedResponses = connectedPlayers - 1;
-    
+
     if (expectedResponses === 0) {
         beginMatch();
         return;
     }
-    
+
     // Broadcast ping
     broadcastToAll({ type: 'ping', timestamp: Date.now() });
-    
+
     // Wait for pong responses
     setTimeout(() => {
         // Mark players who didn't respond as disconnected
@@ -217,10 +217,10 @@ export function startMatch() {
                 State.players[playerId].disconnected = true;
             }
         });
-        
+
         updatePlayersDisplay();
         broadcastToAll({ type: 'playerUpdate', players: State.players, totalScores: State.totalScores });
-        
+
         // Check again if we have enough players
         const stillConnected = Object.values(State.players).filter(p => !p.disconnected).length;
         if (stillConnected < 2) {
@@ -229,7 +229,7 @@ export function startMatch() {
             startBtn.disabled = false;
             return;
         }
-        
+
         beginMatch();
     }, 2000);
 }
@@ -237,22 +237,22 @@ export function startMatch() {
 export function beginMatch() {
     State.setIsGameActive(true);
     State.setHasGameStarted(true);
-    
+
     // Mark all currently connected players as having played
     Object.values(State.players).forEach(player => {
         if (!player.disconnected) {
             player.hasPlayed = true;
         }
     });
-    
+
     State.setCurrentWord(answerWords[Math.floor(Math.random() * answerWords.length)].toUpperCase());
-    
-    broadcastToAll({ 
-        type: 'startGame', 
+
+    broadcastToAll({
+        type: 'startGame',
         word: State.currentWord,
         round: State.currentRound
     });
-    
+
     import('./ui.js').then(({ startGame }) => startGame());
 }
 
@@ -293,7 +293,7 @@ export function leaveGame() {
 
 export function copyRoomId() {
     const roomIdText = document.getElementById('roomIdDisplay').textContent;
-    
+
     // Use modern clipboard API if available
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(roomIdText).then(() => {
@@ -320,7 +320,7 @@ function fallbackCopy(text) {
     textArea.style.left = '-999999px';
     document.body.appendChild(textArea);
     textArea.select();
-    
+
     try {
         document.execCommand('copy');
         const btn = document.getElementById('copyRoomIdBtn');
@@ -333,6 +333,6 @@ function fallbackCopy(text) {
         console.error('Fallback copy failed:', err);
         alert('Failed to copy. Room ID: ' + text);
     }
-    
+
     document.body.removeChild(textArea);
 }
