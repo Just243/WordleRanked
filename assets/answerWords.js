@@ -1,6 +1,6 @@
 //https://github.com/ybenhayun/wordlebot/blob/main/word_lists/officialanswers.js
 
-export const official_answers =
+export const answerWords =
 [
 "ABACK",
 "ABASE",

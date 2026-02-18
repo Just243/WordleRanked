@@ -1,15 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Wordle Ranked</title>
-        <link rel="stylesheet" href="styles.css">
-        <script type="module" src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
-    </head>
-    <body>
-        <script type="module" src="main.js"></script>
-        <script type="module" src="/assets/official_answers.js"></script>
-        <script type="module" src="/assets/valid_words.js"></script>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Wordle</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Main Menu Screen -->
+    <div id="mainMenu" class="screen active">
+        <h1>P2P Wordle</h1>
+        <div class="main-menu">
+            <input type="text" id="usernameInput" placeholder="Enter Username" maxlength="20">
+            <button id="createMatchBtn">Create Match</button>
+            <input type="text" id="joinRoomInput" placeholder="Enter 6-Digit Room ID" maxlength="6">
+            <button id="joinMatchBtn" disabled>Join Match</button>
+            <div id="mainMenuMessage"></div>
+        </div>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div id="lobbyScreen" class="screen">
+        <h1>Lobby</h1>
+        <div class="lobby">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0;">
+                <div class="room-id" id="roomIdDisplay" style="margin: 0;"></div>
+                <button id="copyRoomIdBtn" style="width: auto; padding: 12px 20px; margin: 0;">Copy ID</button>
+            </div>
+            <div class="players-list">
+                <h2>Players</h2>
+                <div id="playersList"></div>
+            </div>
+            <button id="startMatchBtn" style="display: none;">Start Game</button>
+            <div id="waitingMessage" style="display: none; padding: 20px;">Waiting for host to start...</div>
+            <button id="leaveLobbyBtn">Leave Match</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="game-status" id="gameStatus"></div>
+        <div class="game-container">
+            <div class="main-game">
+                <div class="wordle-board" id="wordleBoard"></div>
+                <div class="keyboard" id="keyboard"></div>
+            </div>
+            <div class="sidebar">
+                <div class="other-players">
+                    <h3>Other Players</h3>
+                    <div id="otherPlayersBoards"></div>
+                </div>
+                <div class="chat-container">
+                    <h3>Chat</h3>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input-container">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Type message...">
+                        <button id="chatSend" class="chat-send">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button id="forfeitBtn" style="flex: 1; background: #b59f3b;">Forfeit Round</button>
+            <button id="leaveGameBtn" style="flex: 1;">Leave Match</button>
+        </div>
+    </div>
+
+    <!-- Ready Screen -->
+    <div id="readyScreen" class="screen">
+        <h1>Round Complete!</h1>
+        <div class="scoreboard" id="roundScoreboard"></div>
+        <div class="players-list">
+            <h2>Ready Status</h2>
+            <div id="readyPlayersList"></div>
+        </div>
+        <button id="readyBtn">Ready Up!</button>
+        <button id="leaveReadyBtn">Leave Match</button>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="resultsScreen" class="screen">
+        <h1>Match Complete!</h1>
+        <div class="results-screen">
+            <div class="scoreboard" id="finalScoreboard"></div>
+            <button id="backToMenuBtn">Back to Menu</button>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
 </html>

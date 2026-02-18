@@ -1,0 +1,47 @@
+// Game state variables
+export let peer = null;
+export let connections = [];
+export let isHost = false;
+export let myUsername = '';
+export let roomId = '';
+export let currentWord = '';
+export let currentRow = 0;
+export let currentTile = 0;
+export let guesses = [];
+export let gameStartTime = null;
+export let gameEndTime = null;
+export let players = {};
+export let keyboardState = {};
+export let isGameActive = false;
+export let currentRound = 1;
+export let totalScores = {};
+export let readyPlayers = new Set();
+export let isJoining = false;
+export let joinedRoomId = null;
+export let activePingPlayers = new Set();
+export let roomClosed = false;
+export let hasGameStarted = false;
+
+// Setters for state that needs to be updated from other modules
+export function setPeer(value) { peer = value; }
+export function setConnections(value) { connections = value; }
+export function setIsHost(value) { isHost = value; }
+export function setMyUsername(value) { myUsername = value; }
+export function setRoomId(value) { roomId = value; }
+export function setCurrentWord(value) { currentWord = value; }
+export function setCurrentRow(value) { currentRow = value; }
+export function setCurrentTile(value) { currentTile = value; }
+export function setGuesses(value) { guesses = value; }
+export function setGameStartTime(value) { gameStartTime = value; }
+export function setGameEndTime(value) { gameEndTime = value; }
+export function setPlayers(value) { players = value; }
+export function setKeyboardState(value) { keyboardState = value; }
+export function setIsGameActive(value) { isGameActive = value; }
+export function setCurrentRound(value) { currentRound = value; }
+export function setTotalScores(value) { totalScores = value; }
+export function setReadyPlayers(value) { readyPlayers = value; }
+export function setIsJoining(value) { isJoining = value; }
+export function setJoinedRoomId(value) { joinedRoomId = value; }
+export function setActivePingPlayers(value) { activePingPlayers = value; }
+export function setRoomClosed(value) { roomClosed = value; }
+export function setHasGameStarted(value) { hasGameStarted = value; }
